@@ -25,6 +25,6 @@ func loadRoutes() *chi.Mux {
 func LoadEmailsRoutes(router chi.Router) {
 	emailHandler := &handler.Email{}
 
-	router.Get("/", emailHandler.List)
+	router.Get("/", emailHandler.IndexEmails)
 
 }

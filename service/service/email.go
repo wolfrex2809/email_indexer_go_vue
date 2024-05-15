@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/wolfrex2809/email_indexer_go_vue/client"
 	"github.com/wolfrex2809/email_indexer_go_vue/models"
 )
 
@@ -38,10 +39,11 @@ func IndexEmails() error {
 	}
 
 	var wg sync.WaitGroup
-
+	// TODO: Try to implement a Concurrency patterns to control the amount of workers
 	for _, user := range users {
 		wg.Add(1)
 		go IndexEmailsByUser(user, &wg)
+		// time.Sleep(1 * time.Second)
 	}
 
 	wg.Wait()
@@ -52,13 +54,27 @@ func IndexEmails() error {
 func IndexEmailsByUser(user string, wg *sync.WaitGroup) {
 
 	defer wg.Done()
-
+	log.Println("+ Start Process for user: ", user)
 	emails, err := GetEmailsByUser(user)
 
 	if err != nil {
 		log.Println("Error extracting emails from user: ", user)
 		return
 	}
+
+	var requestBody models.BulkV2Request
+
+	requestBody.Index = "emails"
+	requestBody.Records = emails
+
+	err = client.IndexDataByBulk(requestBody)
+
+	if err != nil {
+		log.Println("There was an error indexing data: ", err)
+		return
+	}
+	log.Println("- End Process for user: ", user)
+
 }
 
 func GetEmailsByUser(user string) ([]models.Email, error) {
