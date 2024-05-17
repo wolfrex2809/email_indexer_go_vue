@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/wolfrex2809/email_indexer_go_vue/config"
 	"github.com/wolfrex2809/email_indexer_go_vue/models"
 )
 
@@ -22,12 +23,12 @@ func IndexDataByBulk(body models.BulkV2Request) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:4080/api/_bulkv2", bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/_bulkv2", config.ConfigEnv.ZincsearchHost), bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err
 	}
 
-	req.SetBasicAuth("admin", "admin")
+	req.SetBasicAuth(config.ConfigEnv.ZincsearchUsername, config.ConfigEnv.ZincsearchPassword)
 
 	resp, err := client.Do(req)
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/wolfrex2809/email_indexer_go_vue/config"
 )
 
 type App struct {
@@ -19,10 +21,12 @@ func New() *App {
 }
 
 func (a *App) Start(ctx context.Context) error {
+
 	server := &http.Server{
-		Addr:    ":3000",
+		Addr:    fmt.Sprintf(":%s", config.ConfigEnv.Port),
 		Handler: a.router,
 	}
+	fmt.Println("Application is running...")
 
 	err := server.ListenAndServe()
 	if err != nil {

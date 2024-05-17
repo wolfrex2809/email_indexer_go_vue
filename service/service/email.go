@@ -9,13 +9,14 @@ import (
 	"sync"
 
 	"github.com/wolfrex2809/email_indexer_go_vue/client"
+	"github.com/wolfrex2809/email_indexer_go_vue/config"
 	"github.com/wolfrex2809/email_indexer_go_vue/models"
 )
 
 func GetAllUsers() ([]string, error) {
 
 	var users []string
-	files, err := os.ReadDir("./enron_mail_20110402/maildir")
+	files, err := os.ReadDir(config.ConfigEnv.EmailDBPath)
 
 	if err != nil {
 		return nil, err
@@ -38,12 +39,13 @@ func IndexEmails() error {
 		return err
 	}
 
+	limiter := make(chan int, config.ConfigEnv.EmailIndexerRoutinesNum)
 	var wg sync.WaitGroup
-	// TODO: Try to implement a Concurrency patterns to control the amount of workers
+
 	for _, user := range users {
+		limiter <- 1
 		wg.Add(1)
-		go IndexEmailsByUser(user, &wg)
-		// time.Sleep(1 * time.Second)
+		go IndexEmailsByUser(user, &wg, limiter)
 	}
 
 	wg.Wait()
@@ -51,7 +53,7 @@ func IndexEmails() error {
 	return nil
 }
 
-func IndexEmailsByUser(user string, wg *sync.WaitGroup) {
+func IndexEmailsByUser(user string, wg *sync.WaitGroup, limiter chan int) {
 
 	defer wg.Done()
 	log.Println("+ Start Process for user: ", user)
@@ -64,7 +66,7 @@ func IndexEmailsByUser(user string, wg *sync.WaitGroup) {
 
 	var requestBody models.BulkV2Request
 
-	requestBody.Index = "emails"
+	requestBody.Index = config.ConfigEnv.EmailIndexName
 	requestBody.Records = emails
 
 	err = client.IndexDataByBulk(requestBody)
@@ -75,13 +77,15 @@ func IndexEmailsByUser(user string, wg *sync.WaitGroup) {
 	}
 	log.Println("- End Process for user: ", user)
 
+	<-limiter
+
 }
 
 func GetEmailsByUser(user string) ([]models.Email, error) {
 
 	var emails []models.Email
 
-	userPath := fmt.Sprintf("%s/%s", "./enron_mail_20110402/maildir", user)
+	userPath := fmt.Sprintf("%s/%s", config.ConfigEnv.EmailDBPath, user)
 
 	err := filepath.Walk(userPath, CheckEmailsFiles(&emails))
 
@@ -121,7 +125,7 @@ func ProcessEmailData(path string) (*models.Email, error) {
 		log.Println("There was an error reading emails files:")
 	}
 
-	arr := strings.SplitN(string(file), "\r\n\r\n", 2)
+	arr := strings.SplitN(string(file), config.ConfigEnv.EmailContentDelimiter, 2)
 
 	if len(arr) != 2 {
 		log.Println("There was an error processing this email file: ", path)
@@ -130,7 +134,7 @@ func ProcessEmailData(path string) (*models.Email, error) {
 
 	email.Content = arr[1]
 
-	emailDetails := strings.Split(arr[0], "\r\n")
+	emailDetails := strings.Split(arr[0], config.ConfigEnv.EmailDetailsDelimiter)
 
 	for i := 0; i < len(emailDetails); i++ {
 		detail := strings.SplitN(emailDetails[i], ": ", 2)
