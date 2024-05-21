@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -156,4 +157,54 @@ func ProcessEmailData(path string) (*models.Email, error) {
 
 	return email, nil
 
+}
+
+func SearchEmails(text string, searchType string) ([]models.Email, error) {
+
+	body := models.SearchRequest{
+		SearchType: searchType,
+		Query: models.SearchQuery{
+			Term: text,
+		},
+		SortFiels: []string{
+			"-@timestamp",
+		},
+		From:       0,
+		MaxResults: 10,
+	}
+
+	response, err := client.SearchData(body)
+
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	var formatResponse models.SearchResponse
+	var emails []models.Email
+	err = json.Unmarshal(response, &formatResponse)
+
+	if err != nil {
+		log.Println("There was an error trying format response (SearchEmails): ", err)
+		return nil, err
+	}
+
+	// Process response data (Map to Email model)
+	for _, hit := range formatResponse.Hits.Hits {
+		var email models.Email
+
+		rawEmail, _ := json.Marshal(hit.Source)
+
+		err := json.Unmarshal(rawEmail, &email)
+
+		if err != nil {
+			log.Println("There was an error trying to map an email: ", err)
+			continue
+		}
+
+		emails = append(emails, email)
+	}
+
+	//Return formated data to handler
+	return emails, nil
 }

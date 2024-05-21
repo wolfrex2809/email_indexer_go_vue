@@ -8,3 +8,8 @@ type Email struct {
 	Subject   string `json:"subject"`
 	Content   string `json:"content"`
 }
+
+type EmailSearchResponse struct {
+	Status string  `json:"status"`
+	Data   []Email `json:"data"`
+}
