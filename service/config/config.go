@@ -1,12 +1,15 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strconv"
 )
 
 var ConfigEnv Config
+var ExecutionModes = []string{"indexer", "service"}
 
 type Config struct {
 	Port                    string `mapstructure:"port" json:"port"`
@@ -18,6 +21,7 @@ type Config struct {
 	ZincsearchHost          string `mapstructure:"zincsearch_host" json:"zincsearch_host"`
 	ZincsearchUsername      string `mapstructure:"zincsearch_username" json:"zincsearch_username"`
 	ZincsearchPassword      string `mapstructure:"zincsearch_password" json:"zincsearch_password"`
+	ExecutionMode           string `mapstructure:"execution_mode" json:"execution_mode"`
 }
 
 func LoadEnvs() {
@@ -87,5 +91,19 @@ func LoadEnvs() {
 		ConfigEnv.ZincsearchPassword = os.Getenv("ZINCSEARCH_PASSWORD")
 	} else {
 		ConfigEnv.ZincsearchPassword = "admin"
+	}
+
+	//ExecutionMode
+	if os.Getenv("EXECUTION_MODE") != "" {
+		mode := os.Getenv("EXECUTION_MODE")
+		if slices.Contains(ExecutionModes, mode) {
+			ConfigEnv.ExecutionMode = mode
+		} else {
+			log.Println(fmt.Sprintf("Execution mode '%s' is not supported | Running in 'service' mode.", mode))
+			ConfigEnv.ExecutionMode = "service"
+		}
+	} else {
+		log.Println("There wasn't set an execution mode | Running in 'service' mode.")
+		ConfigEnv.ExecutionMode = "service"
 	}
 }

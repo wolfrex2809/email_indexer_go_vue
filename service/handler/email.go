@@ -25,7 +25,7 @@ func IndexEmails(w http.ResponseWriter, r *http.Request) {
 func SearchEmails(w http.ResponseWriter, r *http.Request) {
 
 	// Get "text" param from the Request's query params
-	searchType := "match"
+	searchType := "matchphrase"
 	text := r.URL.Query().Get("text")
 	from := r.URL.Query().Get("from")
 	to := r.URL.Query().Get("to")
