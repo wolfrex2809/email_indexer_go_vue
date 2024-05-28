@@ -17,7 +17,7 @@ func loadRoutes() *chi.Mux {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	router.Route("/emails", LoadEmailsRoutes)
+	router.Route("/api/emails", LoadEmailsRoutes)
 
 	return router
 }

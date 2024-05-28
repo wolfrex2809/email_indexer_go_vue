@@ -84,7 +84,6 @@ func SearchData(body models.SearchRequest) ([]byte, error) {
 
 	if resp.StatusCode != 200 {
 		responseError := fmt.Sprintf("There was an error trying to search data in Zincsearch: %s", string(respBody))
-		log.Println(responseError)
 		return nil, errors.New(responseError)
 	}
 

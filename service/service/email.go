@@ -1,9 +1,14 @@
 package service
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,6 +39,16 @@ func GetAllUsers() ([]string, error) {
 
 func IndexEmails() error {
 
+	emails, err := SearchEmails("a", "matchphrase")
+	if emails != nil {
+		return errors.New("Email database is already indexed.")
+	}
+
+	err = FetchDecompress()
+	if err != nil {
+		return err
+	}
+	log.Println("* Starting index process...")
 	users, err := GetAllUsers()
 
 	if err != nil {
@@ -50,7 +65,11 @@ func IndexEmails() error {
 	}
 
 	wg.Wait()
-
+	log.Println("* Index process has finished successfully.")
+	log.Println("* Cleaning...")
+	os.RemoveAll("enron_mail_20110402/")
+	os.Remove("enron_mail_20110402.tgz")
+	log.Println("* Done.")
 	return nil
 }
 
@@ -207,4 +226,83 @@ func SearchEmails(text string, searchType string) ([]models.Email, error) {
 
 	//Return formated data to handler
 	return emails, nil
+}
+
+func FetchDecompress() error {
+
+	err := FetchEmailDatabase()
+	if err != nil {
+		return err
+	}
+
+	database, err := os.Open("enron_mail_20110402.tgz")
+	if err != nil {
+		return err
+	}
+
+	err = UnTar(database)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func FetchEmailDatabase() error {
+
+	log.Println("* Fetching email database...")
+	resp, err := http.Get("http://download.srv.cs.cmu.edu//~enron/enron_mail_20110402.tgz")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	out, err := os.Create("enron_mail_20110402.tgz")
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	return err
+}
+
+func UnTar(gzipStream io.Reader) error {
+
+	log.Println("* Extracting email database...")
+	uncompressedStream, err := gzip.NewReader(gzipStream)
+	if err != nil {
+		return err
+	}
+
+	tarReader := tar.NewReader(uncompressedStream)
+	var header *tar.Header
+	for header, err = tarReader.Next(); err == nil; header, err = tarReader.Next() {
+		switch header.Typeflag {
+		case tar.TypeDir:
+			if err := os.Mkdir(header.Name, 0755); err != nil {
+				return fmt.Errorf("ExtractTarGz: Mkdir() failed: %w", err)
+			}
+		case tar.TypeReg:
+			outFile, err := os.Create(header.Name)
+			if err != nil {
+				return fmt.Errorf("ExtractTarGz: Create() failed: %w", err)
+			}
+
+			if _, err := io.Copy(outFile, tarReader); err != nil {
+				// outFile.Close error omitted as Copy error is more interesting at this point
+				outFile.Close()
+				return fmt.Errorf("ExtractTarGz: Copy() failed: %w", err)
+			}
+			if err := outFile.Close(); err != nil {
+				return fmt.Errorf("ExtractTarGz: Close() failed: %w", err)
+			}
+		default:
+			return fmt.Errorf("ExtractTarGz: uknown type: %b in %s", header.Typeflag, header.Name)
+		}
+	}
+	if err != io.EOF {
+		return fmt.Errorf("ExtractTarGz: Next() failed: %w", err)
+	}
+	return nil
 }
