@@ -3,12 +3,12 @@ services:
   zinc-search:
     image: public.ecr.aws/zinclabs/zinc:latest
     environment:
-      - ZINC_FIRST_ADMIN_USER=${ZINC_FIRST_ADMIN_USER}
-      - ZINC_FIRST_ADMIN_PASSWORD=${ZINC_FIRST_ADMIN_PASSWORD}
+      - ZINC_FIRST_ADMIN_USER=${ZINC_FIRST_ADMIN_USER:-admin}             # Zincsearch instance username ("admin" by default)
+      - ZINC_FIRST_ADMIN_PASSWORD=${ZINC_FIRST_ADMIN_PASSWORD:-admin}     # Zincsearch instance password ("admin" by default)
     ports:
       - '4080:4080'
-    networks:
-      - main_network
+    volumes:
+      - ./zinc-search:/var/lib/zincsearch
   service:
     build:
       context: ./service
@@ -16,15 +16,18 @@ services:
       args:
         progress: plain
     environment:
-      - ZINCSEARCH_HOST=http://zinc-search:4080
-      - ZINCSEARCH_USERNAME=${ZINC_FIRST_ADMIN_USER}
-      - ZINCSEARCH_PASSWORD=${ZINC_FIRST_ADMIN_PASSWORD}
+      - ZINCSEARCH_HOST=http://zinc-search:4080                     # Zincsearch instance url ("http://zinc-search:4080" by default)
+      - ZINCSEARCH_USERNAME=${ZINC_FIRST_ADMIN_USER:-admin}         # Zincsearch instance username ("admin" by default)
+      - ZINCSEARCH_PASSWORD=${ZINC_FIRST_ADMIN_PASSWORD:-admin}     # Zincsearch instance username ("admin" by default)
+      - EMAIL_INDEX_NAME = ${EMAIL_INDEX_NAME}                      # Zincsearch index name for emails
+      - EMAIL_CONTENT_DELIMITER = ${EMAIL_CONTENT_DELIMITER}        # Email index content delimiter ("\r\n\r\n" by default)
+      - EMAIL_DETAILS_DELIMITER = ${EMAIL_DETAILS_DELIMITER}        # Email index details delimiter ("\r\n" by default)
+      - EMAIL_INDEXER_ROUTINES_NUM = ${EMAIL_INDEXER_ROUTINES_NUM}  # Max Number of routines running at same time (40 by default)
+      - EMAIL_DATABASE_URL = ${EMAIL_DATABASE_URL}                  # Email database url ("http://download.srv.cs.cmu.edu//~enron/enron_mail_20110402.tgz" by default)
     ports:
       - 3000:3000
     depends_on:
       - zinc-search
-    networks:
-      - main_network
     restart: on-failure
   client:
     build:
@@ -32,15 +35,9 @@ services:
       dockerfile: ./Dockerfile
       args:
         progress: plain
-        SERVICE_HOST: http://service:3000
+        SERVICE_HOST: http://service:3000                           # Service instance url ("http://service:3000" by default)
     ports:
       - 8080:8080
     depends_on:
       - service
-    networks:
-      - main_network
     restart: on-failure
-
-networks:
-  main_network:
-    driver: bridge

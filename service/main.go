@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"runtime/pprof"
 
 	"github.com/wolfrex2809/email_indexer_go_vue/app"
 	"github.com/wolfrex2809/email_indexer_go_vue/config"
@@ -11,6 +13,16 @@ import (
 )
 
 func main() {
+
+	f, err := os.Create("profile.pb.gz")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = pprof.StartCPUProfile(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer pprof.StopCPUProfile()
 
 	config.LoadEnvs()
 	if config.ConfigEnv.ExecutionMode == "indexer" {

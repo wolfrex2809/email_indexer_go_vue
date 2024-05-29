@@ -16,4 +16,4 @@ COPY --from=builder email-service/ /email-service/
 
 EXPOSE 3000
 
-CMD EXECUTION_MODE=indexer ./email-service && ./email-service
+CMD EXECUTION_MODE=indexer ./email-service && EXECUTION_MODE=service ./email-service

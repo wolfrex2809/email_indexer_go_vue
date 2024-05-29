@@ -6,6 +6,7 @@ import (
 	"os"
 	"slices"
 	"strconv"
+	"strings"
 )
 
 var ConfigEnv Config
@@ -13,6 +14,9 @@ var ExecutionModes = []string{"indexer", "service"}
 
 type Config struct {
 	Port                    string `mapstructure:"port" json:"port"`
+	EmailDatabaseUrl        string `mapstructure:"email_database_url" json:"email_database_url"`
+	EmailDatabaseFile       string `mapstructure:"email_database_file" json:"email_database_file"`
+	EmailDatabaseDir        string `mapstructure:"email_database_dir" json:"email_database_dir"`
 	EmailDBPath             string `mapstructure:"email_db_path" json:"email_db_path"`
 	EmailIndexName          string `mapstructure:"email_index_name" json:"email_index_name"`
 	EmailContentDelimiter   string `mapstructure:"email_content_delimiter" json:"email_content_delimiter"`
@@ -33,12 +37,26 @@ func LoadEnvs() {
 		ConfigEnv.Port = "3000"
 	}
 
-	//EmailDBPath
-	if os.Getenv("EMAIL_DB_PATH") != "" {
-		ConfigEnv.EmailDBPath = os.Getenv("EMAIL_DB_PATH")
+	//EmailDatabaseUrl
+	if os.Getenv("EMAIL_DATABASE_URL") != "" {
+		ConfigEnv.EmailDatabaseUrl = os.Getenv("EMAIL_DATABASE_URL")
 	} else {
-		ConfigEnv.EmailDBPath = "./enron_mail_20110402/maildir"
+		ConfigEnv.EmailDatabaseUrl = "http://download.srv.cs.cmu.edu//~enron/enron_mail_20110402.tgz"
 	}
+
+	urlSplit := strings.Split(ConfigEnv.EmailDatabaseUrl, "/")
+	dbFileName := urlSplit[len(urlSplit)-1]
+	dbFileSplit := strings.Split(dbFileName, ".")
+	dbDirName := dbFileSplit[0]
+
+	//EmailDatabaseFile
+	ConfigEnv.EmailDatabaseFile = dbFileName
+
+	//EmailDatabaseDir
+	ConfigEnv.EmailDatabaseDir = dbDirName
+
+	//EmailDBPath
+	ConfigEnv.EmailDBPath = fmt.Sprintf("./%s/maildir", dbDirName)
 
 	//EmailIndexName
 	if os.Getenv("EMAIL_INDEX_NAME") != "" {
@@ -69,7 +87,7 @@ func LoadEnvs() {
 		}
 		ConfigEnv.EmailIndexerRoutinesNum = num
 	} else {
-		ConfigEnv.EmailIndexerRoutinesNum = 30
+		ConfigEnv.EmailIndexerRoutinesNum = 40
 	}
 
 	//ZincsearchHost
@@ -106,4 +124,5 @@ func LoadEnvs() {
 		log.Println("There wasn't set an execution mode | Running in 'service' mode.")
 		ConfigEnv.ExecutionMode = "service"
 	}
+
 }

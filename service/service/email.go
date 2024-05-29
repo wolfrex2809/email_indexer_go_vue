@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 
@@ -18,6 +19,19 @@ import (
 	"github.com/wolfrex2809/email_indexer_go_vue/config"
 	"github.com/wolfrex2809/email_indexer_go_vue/models"
 )
+
+var TarSupportedExt = []string{
+	"gz",
+	"tgz",
+	"bz",
+	"tbz",
+	"bz2",
+	"tbz2",
+	"lzo",
+	"tzo",
+	"7z",
+	"xz",
+}
 
 func GetAllUsers() ([]string, error) {
 
@@ -67,8 +81,8 @@ func IndexEmails() error {
 	wg.Wait()
 	log.Println("* Index process has finished successfully.")
 	log.Println("* Cleaning...")
-	os.RemoveAll("enron_mail_20110402/")
-	os.Remove("enron_mail_20110402.tgz")
+	os.RemoveAll(fmt.Sprintf("%s/", config.ConfigEnv.EmailDatabaseDir))
+	os.Remove(config.ConfigEnv.EmailDatabaseFile)
 	log.Println("* Done.")
 	return nil
 }
@@ -230,12 +244,17 @@ func SearchEmails(text string, searchType string) ([]models.Email, error) {
 
 func FetchDecompress() error {
 
+	fileExt := strings.Split(config.ConfigEnv.EmailDatabaseUrl, ".")
+	if !slices.Contains(TarSupportedExt, fileExt[len(fileExt)-1]) {
+		return errors.New("Unsupported file extension")
+	}
+
 	err := FetchEmailDatabase()
 	if err != nil {
 		return err
 	}
 
-	database, err := os.Open("enron_mail_20110402.tgz")
+	database, err := os.Open(config.ConfigEnv.EmailDatabaseFile)
 	if err != nil {
 		return err
 	}
@@ -251,13 +270,13 @@ func FetchDecompress() error {
 func FetchEmailDatabase() error {
 
 	log.Println("* Fetching email database...")
-	resp, err := http.Get("http://download.srv.cs.cmu.edu//~enron/enron_mail_20110402.tgz")
+	resp, err := http.Get(config.ConfigEnv.EmailDatabaseUrl)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	out, err := os.Create("enron_mail_20110402.tgz")
+	out, err := os.Create(config.ConfigEnv.EmailDatabaseFile)
 	if err != nil {
 		return err
 	}

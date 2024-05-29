@@ -7,7 +7,7 @@ import EmailList from "./components/EmailList.vue"
 
 const emails = ref<Email[]>();
 const text = ref<string>("");
-var currentEmail = ref<Email>();
+const currentEmail = ref<Email>();
 const CurrentEmailContainer = ref();
 const EmailListContainer = ref();
 
@@ -20,7 +20,7 @@ const getEmails = async (text: string = "a") => {
     })
     emails.value = data.data;
     EmailListContainer.value.scrollTop = 0;
-    currentEmail = ref<Email>()
+    currentEmail.value = undefined
   } catch(error){
     console.log(error)
   }
@@ -44,12 +44,25 @@ const viewEmail = (email: Email) => {
   }
 }
 
+const clearView = () => {
+  try{
+    currentEmail.value = undefined
+  } catch(error){
+    console.log(error)
+  }
+}
+
 onMounted(() => {
   getEmails()
 })
 </script>
 
 <template>
+  <div v-if="currentEmail" @click="clearView" class="w-8 z-10 max-sm:block md:hidden top-2 start-2 absolute">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+      <path fillRule="evenodd" d="M11.03 3.97a.75.75 0 0 1 0 1.06l-6.22 6.22H21a.75.75 0 0 1 0 1.5H4.81l6.22 6.22a.75.75 0 1 1-1.06 1.06l-7.5-7.5a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
+    </svg>
+  </div>
   <div class="text-center mt-8">
     <img src="/logo.png" class="mx-auto" alt="logo" width="100" />
     <h1 class="mt-2 text-2xl text-blue-400 font-bold font-mono">Email Searcher</h1>
@@ -66,13 +79,20 @@ onMounted(() => {
         </div>
     </form>
   </div>
-  <div class="mt-6 grid grid-cols-12 outline outline-blue-400 min-h-96 max-h-96 mx-2 rounded-md overflow-y-hidden">
+  <div class="max-sm:hidden md:grid mt-6 grid grid-cols-12 outline outline-blue-400 min-h-96 max-h-96 mx-3 rounded-md overflow-y-hidden">
     <div class="col-span-3 overflow-y-auto bg-gray-800 max-h-96 divide-y" ref="EmailListContainer">
       <EmailList :emails="emails" :currentEmail="currentEmail" @select-email="viewEmail"/>
     </div>
     <div class="col-span-9 overflow-y-auto bg-gray-800 border-l-4 border-blue-400 p-3 max-h-96" ref="CurrentEmailContainer">
       <CurrentEmail :currentEmail="currentEmail"/>
-
+    </div>
+  </div>
+  <div class="max-sm:block md:hidden mt-6 grid grid-cols-12 outline outline-blue-400 min-h-96 max-h-96 mx-3 rounded-md overflow-y-hidden">
+    <div v-if="!currentEmail" class="overflow-y-auto bg-gray-800 max-h-96 divide-y" ref="EmailListContainer">
+      <EmailList :emails="emails" :currentEmail="currentEmail" @select-email="viewEmail"/>
+    </div>
+    <div v-if="currentEmail" class="overflow-y-auto bg-gray-800 p-3 max-h-96" ref="CurrentEmailContainer">
+      <CurrentEmail :currentEmail="currentEmail"/>
     </div>
   </div>
 
