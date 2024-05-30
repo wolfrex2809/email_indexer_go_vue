@@ -19,7 +19,7 @@ services:
       - ZINCSEARCH_HOST=http://zinc-search:4080                     # Zincsearch instance url ("http://zinc-search:4080" by default)
       - ZINCSEARCH_USERNAME=${ZINC_FIRST_ADMIN_USER:-admin}         # Zincsearch instance username ("admin" by default)
       - ZINCSEARCH_PASSWORD=${ZINC_FIRST_ADMIN_PASSWORD:-admin}     # Zincsearch instance username ("admin" by default)
-      - EMAIL_INDEX_NAME = ${EMAIL_INDEX_NAME}                      # Zincsearch index name for emails
+      - EMAIL_INDEX_NAME = ${EMAIL_INDEX_NAME}                      # Zincsearch index name for emails ("emails" by default)
       - EMAIL_CONTENT_DELIMITER = ${EMAIL_CONTENT_DELIMITER}        # Email index content delimiter ("\r\n\r\n" by default)
       - EMAIL_DETAILS_DELIMITER = ${EMAIL_DETAILS_DELIMITER}        # Email index details delimiter ("\r\n" by default)
       - EMAIL_INDEXER_ROUTINES_NUM = ${EMAIL_INDEXER_ROUTINES_NUM}  # Max Number of routines running at same time (40 by default)
