@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/node": "^20.12.13",
     "axios": "^1.7.2",
     "vue": "^3.4.21"
   },

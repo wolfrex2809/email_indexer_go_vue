@@ -1,9 +1,52 @@
-# Vue 3 + TypeScript + Vite
+<h1 align="center">
+  <img alt="logo-vue" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Vue.js_Logo_2.svg/512px-Vue.js_Logo_2.svg.png?20170919082558" width="100px"/>
+  <img alt="logo-typescript" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Typescript_logo_2020.svg/512px-Typescript_logo_2020.svg.png" width="100px"/>
+  <br/>
+  Email Searcher WebApp
+</h1>
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Web application developed to search and show emails fetched from a Backend application powered by a search engine.
 
-## Recommended Setup
+## 📄 Requirements
+* Node 22 [→link](https://nodejs.org/en/)
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (previously Volar) and disable Vetur
+## 🌐 Environment Variables
+| Variable     | Description                                              | Default Value         |
+|--------------|----------------------------------------------------------|-----------------------|
+| SERVICE_HOST | Defines the URL of the API used to fetch the emails data | http://localhost:3000 |
 
-- Use [vue-tsc](https://github.com/vuejs/language-tools/tree/master/packages/tsc) for performing the same type checking from the command line, or for generating d.ts files for SFCs.
+
+## 🧩 Development
+Firstly, you must fetch the `dependencies` by using the following command:
+```bash
+npm install
+```
+
+Later, you must serve locally by using the following command:
+```bash
+npm run dev
+```
+
+## 🏗️ Build
+There are 2 way to build this application.
+
+### Node Cli
+Execute the following command:
+```bash
+npm run build
+```
+>**ⓘ NOTE**: The output of this command can be found at `/dist` directory. 
+
+### Docker
+You can build a docker image by using the following command (Changing the "{service_url}" and the "{image_name}"):
+```bash
+docker build --build-arg="SERVICE_HOST={service_url}" -t {image_name} .
+```
+>**ⓘ NOTE**: You must have docker installed in your environment. 
+
+
+## ➕ Additional Information
+ To avoid "CORS Errors" during the `Preflight Request`, there was configured a `proxy` across "Vite Configuration", but this proxy only works when you run the development server. To keep this configuration, there was  also configured a `proxy` across "Nginx Configuration". In both cases you must to pass the `SERVICE_HOST` environment variable.
+
+
+ 😊 Made with ❤️!

@@ -8,6 +8,12 @@
 </h1>
 <p align="center">Monorepo application developed to download, extract, index and show an email database. Using <a href="https://zincsearch-docs.zinc.dev/">Zincsearch</a> as search engine and data storage, <a href="https://go.dev/">Go</a> as Backend language and <a href="https://vuejs.org/">Vue</a>+<a href="https://www.typescriptlang.org/">TS</a> as Frontend technology.</p>
 
+
+## 📜 Table of Projects
+
+* [Client](client/)
+* [Service](service/)
+
 ## 🖥️ Usage
 To run this monorepo there was performed a `Docker Compose` file to run it by using a single command.
 ```bash
@@ -29,3 +35,9 @@ There are several configurations can be set to customize this application, this 
 | EMAIL_DATABASE_URL         | Defines the URL where the database is going to be downloaded (Only tar files are supported)                                                      | [http://download.srv.cs.cmu.edu//~enron/enron_mail_20110402.tgz](http://download.srv.cs.cmu.edu//~enron/enron_mail_20110402.tgz) |
 
 
+## 📱 Contact
+
+* 📧 **Email**: [Adrian V.](mailto:theblacksstrike@gmail.com)
+* 🧳 **Linkedin**: [Adrian V.](https://www.linkedin.com/in/adrian-velasquez-lopez-261570135/)
+
+ 😊 Made with ❤️!

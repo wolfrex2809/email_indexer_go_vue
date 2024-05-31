@@ -33,7 +33,7 @@ Firstly, you must fetch the `dependencies` by using the following command:
 go mod tidy
 ```
 
-Later, you run the program use the following command>
+Later, you run the program use the following command:
 ```bash
 go run main.go
 ```
@@ -58,3 +58,6 @@ You can build a docker image by using the following command (Changing the "{imag
 docker build -t {image_name} .
 ```
 >**ⓘ NOTE**: You must have docker installed in your environment.
+
+
+ 😊 Made with ❤️!
