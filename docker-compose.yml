@@ -23,6 +23,7 @@ services:
       - EMAIL_CONTENT_DELIMITER = ${EMAIL_CONTENT_DELIMITER}        # Email index content delimiter ("\r\n\r\n" by default)
       - EMAIL_DETAILS_DELIMITER = ${EMAIL_DETAILS_DELIMITER}        # Email index details delimiter ("\r\n" by default)
       - EMAIL_INDEXER_ROUTINES_NUM = ${EMAIL_INDEXER_ROUTINES_NUM}  # Max Number of routines running at same time (40 by default)
+      - EMAIL_DATE_FORMAT = ${EMAIL_DATE_FORMAT}                    # Emails date parsing format ("Mon, 2 Jan 2006 15:04:05 -0700 (MST)" by default)
       - EMAIL_DATABASE_URL = ${EMAIL_DATABASE_URL}                  # Email database url ("http://download.srv.cs.cmu.edu//~enron/enron_mail_20110402.tgz" by default)
     ports:
       - 3000:3000

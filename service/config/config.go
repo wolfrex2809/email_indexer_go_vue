@@ -22,6 +22,7 @@ type Config struct {
 	EmailContentDelimiter   string `mapstructure:"email_content_delimiter" json:"email_content_delimiter"`
 	EmailDetailsDelimiter   string `mapstructure:"email_details_delimiter" json:"email_details_delimiter"`
 	EmailIndexerRoutinesNum int    `mapstructure:"email_indexer_routines_num" json:"email_indexer_routines_num"`
+	EmailDateFormat         string `mapstructure:"email_date_format" json:"email_date_format"`
 	ZincsearchHost          string `mapstructure:"zincsearch_host" json:"zincsearch_host"`
 	ZincsearchUsername      string `mapstructure:"zincsearch_username" json:"zincsearch_username"`
 	ZincsearchPassword      string `mapstructure:"zincsearch_password" json:"zincsearch_password"`
@@ -88,6 +89,13 @@ func LoadEnvs() {
 		ConfigEnv.EmailIndexerRoutinesNum = num
 	} else {
 		ConfigEnv.EmailIndexerRoutinesNum = 40
+	}
+
+	//EmailDateFormat
+	if os.Getenv("EMAIL_DATE_FORMAT") != "" {
+		ConfigEnv.EmailDateFormat = os.Getenv("EMAIL_DATE_FORMAT")
+	} else {
+		ConfigEnv.EmailDateFormat = "Mon, 2 Jan 2006 15:04:05 -0700 (MST)"
 	}
 
 	//ZincsearchHost

@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/wolfrex2809/email_indexer_go_vue/client"
 	"github.com/wolfrex2809/email_indexer_go_vue/config"
@@ -139,10 +140,11 @@ func CheckEmailsFiles(emails *[]models.Email) filepath.WalkFunc {
 			email, err := ProcessEmailData(path)
 
 			if err != nil || email == nil {
-				return nil
+				log.Printf("There was an error processing this email file: %s | Error: %s", path, err)
+			} else {
+				*emails = append(*emails, *email)
 			}
 
-			*emails = append(*emails, *email)
 		}
 
 		return nil
@@ -176,7 +178,11 @@ func ProcessEmailData(path string) (*models.Email, error) {
 		case "Message-ID":
 			email.MessageID = detail[1]
 		case "Date":
-			email.Date = detail[1]
+			date, err := ParseDate(detail[1])
+			if err != nil {
+				return nil, err
+			}
+			email.Date = date
 		case "From":
 			email.From = detail[1]
 		case "To":
@@ -200,7 +206,7 @@ func SearchEmails(text string, searchType string) ([]models.Email, error) {
 			Term: text,
 		},
 		SortFiels: []string{
-			"-@timestamp",
+			"-date",
 		},
 		From:       0,
 		MaxResults: 10,
@@ -324,4 +330,12 @@ func UnTar(gzipStream io.Reader) error {
 		return fmt.Errorf("ExtractTarGz: Next() failed: %w", err)
 	}
 	return nil
+}
+
+func ParseDate(text string) (time.Time, error) {
+	output, err := time.Parse(config.ConfigEnv.EmailDateFormat, text)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("There was a error trying to parse a date: %s", err)
+	}
+	return output, nil
 }
