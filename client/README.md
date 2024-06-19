@@ -7,6 +7,12 @@
 
 Web application developed to search and show emails fetched from a Backend application powered by a search engine.
 
+<h1 align="center">
+  <img alt="logo-vue" src="https://github.com/wolfrex2809/email_indexer_go_vue/assets/82114869/8a7fc9cf-3323-45ff-ad56-2a8c383c849b" width="500px"/>
+  <img alt="logo-vue" src="https://github.com/wolfrex2809/email_indexer_go_vue/assets/82114869/e406598f-3e61-4fd5-a280-b4530bcdb981" width="150px"/>
+  <img alt="logo-vue" src="https://github.com/wolfrex2809/email_indexer_go_vue/assets/82114869/729553b9-468f-47ca-abfe-2bfc69f938a5" width="150px"/>
+</h1>
+
 ## 📄 Requirements
 * Node 22 [→link](https://nodejs.org/en/)
 
