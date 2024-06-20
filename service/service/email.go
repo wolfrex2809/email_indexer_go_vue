@@ -54,8 +54,8 @@ func GetAllUsers() ([]string, error) {
 
 func IndexEmails() error {
 
-	emails, err := SearchEmails("a", "matchphrase")
-	if emails != nil {
+	emails, total, err := SearchEmails("a", "matchphrase", 0)
+	if emails != nil || total != 0 {
 		return errors.New("Email database is already indexed.")
 	}
 
@@ -198,8 +198,12 @@ func ProcessEmailData(path string) (*models.Email, error) {
 
 }
 
-func SearchEmails(text string, searchType string) ([]models.Email, error) {
+func SearchEmails(text string, searchType string, page int) ([]models.Email, int, error) {
+	var from = 0
 
+	if page != 0 {
+		from = page * 10
+	}
 	body := models.SearchRequest{
 		SearchType: searchType,
 		Query: models.SearchQuery{
@@ -208,7 +212,7 @@ func SearchEmails(text string, searchType string) ([]models.Email, error) {
 		SortFiels: []string{
 			"-date",
 		},
-		From:       0,
+		From:       from,
 		MaxResults: 10,
 	}
 
@@ -216,7 +220,7 @@ func SearchEmails(text string, searchType string) ([]models.Email, error) {
 
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return nil, 0, err
 	}
 
 	var formatResponse models.SearchResponse
@@ -225,7 +229,7 @@ func SearchEmails(text string, searchType string) ([]models.Email, error) {
 
 	if err != nil {
 		log.Println("There was an error trying format response (SearchEmails): ", err)
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Process response data (Map to Email model)
@@ -245,7 +249,7 @@ func SearchEmails(text string, searchType string) ([]models.Email, error) {
 	}
 
 	//Return formated data to handler
-	return emails, nil
+	return emails, formatResponse.Hits.Total.Value, nil
 }
 
 func FetchDecompress() error {

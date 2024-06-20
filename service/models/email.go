@@ -14,4 +14,5 @@ type Email struct {
 type EmailSearchResponse struct {
 	Status string  `json:"status"`
 	Data   []Email `json:"data"`
+	Total  int     `json:"total"`
 }

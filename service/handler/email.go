@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/wolfrex2809/email_indexer_go_vue/models"
 	"github.com/wolfrex2809/email_indexer_go_vue/service"
@@ -29,6 +30,18 @@ func SearchEmails(w http.ResponseWriter, r *http.Request) {
 	text := r.URL.Query().Get("text")
 	from := r.URL.Query().Get("from")
 	to := r.URL.Query().Get("to")
+	page := 0
+
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(models.CustomError{
+			Status: "Failed",
+			Msg:    err.Error(),
+		})
+	}
 
 	if from != "" || to != "" {
 		if from != "" {
@@ -40,8 +53,9 @@ func SearchEmails(w http.ResponseWriter, r *http.Request) {
 		}
 		searchType = "querystring"
 	}
+
 	// Call the search function using the "text"
-	emails, err := service.SearchEmails(text, searchType)
+	emails, total, err := service.SearchEmails(text, searchType, page)
 
 	if err != nil {
 		// Prapare the response if search wasn't successfull
@@ -58,6 +72,7 @@ func SearchEmails(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(models.EmailSearchResponse{
 			Status: "Success",
 			Data:   emails,
+			Total:  total,
 		})
 	}
 }
