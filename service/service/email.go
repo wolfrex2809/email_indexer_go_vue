@@ -199,11 +199,6 @@ func ProcessEmailData(path string) (*models.Email, error) {
 }
 
 func SearchEmails(text string, searchType string, page int) ([]models.Email, int, error) {
-	var from = 0
-
-	if page != 0 {
-		from = page * 10
-	}
 	body := models.SearchRequest{
 		SearchType: searchType,
 		Query: models.SearchQuery{
@@ -212,7 +207,7 @@ func SearchEmails(text string, searchType string, page int) ([]models.Email, int
 		SortFiels: []string{
 			"-date",
 		},
-		From:       from,
+		From:       page * 10,
 		MaxResults: 10,
 	}
 
